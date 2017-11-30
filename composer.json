@@ -1,0 +1,22 @@
+{
+    "name": "mic2100/events",
+    "type": "library",
+    "require-dev": {
+        "phpunit/phpunit": "^6.4",
+        "larapack/dd": "1.*",
+        "symfony/var-dumper": "~3.2"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Michael Bardsley",
+            "email": "mic.bardsley@outlook.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Mic2100\\Events\\": "src",
+            "Mic2100EventsTests\\": "tests"
+        }
+    }
+}
