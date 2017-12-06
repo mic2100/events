@@ -80,22 +80,16 @@ final class Dispatcher
      */
     public function trigger(string $handle)
     {
-        if ($this->hasEvent($handle)) {
-            if (!$this->events[$handle]->handle()) {
-                throw new \Exception(sprintf('Failed Event: %s', $handle));
-            }
-        }
-
-        if ($this->isWildcardHandle($handle)) {
+        if ($this->hasEvent($handle) && !$this->handleEvent($this->events[$handle])) {
+            throw new \Exception(sprintf('Failed Event: %s', $handle));
+        } elseif ($this->isWildcardHandle($handle)) {
             $eventsFailed = $this->processWildcardHandle($handle);
             if ($eventsFailed) {
                 throw new \Exception(sprintf('Failed Events: \'%s\'', implode(', ', $eventsFailed)));
             }
-
-            return;
+        } else {
+            throw new \Exception(sprintf('Event \'%s\' does not exist', $handle));
         }
-
-        throw new \Exception(sprintf('Event \'%s\' does not exist', $handle));
     }
 
     /**
@@ -107,10 +101,8 @@ final class Dispatcher
     private function processWildcardHandle(string $handle) : array
     {
         $eventsFailed = [];
-        $this->processWildcardEvents($handle, function ($handle, $event) use (&$eventsFailed) {
-            if (!$event->handle()) {
-                $eventsFailed[] = $handle;
-            }
+        $this->processMatchingWildcardEvents($handle, function ($handle, $event) use (&$eventsFailed) {
+            !$this->handleEvent($event) && $eventsFailed[] = $handle;
         });
 
         return $eventsFailed;
@@ -124,7 +116,7 @@ final class Dispatcher
      */
     private function processWildcardRemoval(string $handle) : array
     {
-        $this->processWildcardEvents($handle, function ($handle) {
+        $this->processMatchingWildcardEvents($handle, function ($handle) {
             unset($this->events[$handle]);
         });
     }
@@ -137,7 +129,7 @@ final class Dispatcher
      * @param string $handle
      * @param callable $method
      */
-    private function processWildcardEvents(string $handle, callable $method)
+    private function processMatchingWildcardEvents(string $handle, callable $method)
     {
         $startOfHandle = substr($handle, 0, -1);
         foreach ($this->events as $eventHandle => $event) {
@@ -156,5 +148,14 @@ final class Dispatcher
     private function isWildcardHandle(string $handle) : bool
     {
         return substr($handle, -1) == $this->wildcard;
+    }
+
+    /**
+     * @param EventInterface $event
+     * @return bool
+     */
+    private function handleEvent(EventInterface $event) : bool
+    {
+        return $event->handle();
     }
 }

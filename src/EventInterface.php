@@ -26,7 +26,7 @@ interface EventInterface
     /**
      * Handle the event
      *
-     * @return bool
+     * @return bool true/false completed/failed
      */
     public function handle() : bool;
 }
