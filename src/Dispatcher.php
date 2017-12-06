@@ -43,18 +43,44 @@ final class Dispatcher
     }
 
     /**
+     * Removes the event from the dispatcher
+     *
+     * @param string $handle
+     */
+    public function removeEvent(string $handle)
+    {
+        if ($this->hasEvent($handle)) {
+            unset($this->events[$handle]);
+        } elseif ($this->isWildcardHandle($handle)) {
+            $this->processWildcardRemoval($handle);
+        }
+    }
+
+    /**
+     * Has the event been added to the dispatcher
+     *
+     * @param string $handle
+     * @return bool
+     */
+    private function hasEvent(string $handle) : bool
+    {
+        return isset($this->events[$handle]) || array_key_exists($handle, $this->events);
+    }
+
+    /**
      * Trigger the event using the handle
      *
-     * The handle can also be a wildcard '*' doing this will run all events that start with provided handle
+     * The handle can also be a wildcard '*' doing this will run all events that
+     * start with provided handle
      * Wildcard Handles will looks like:
-     * email* - will run all events starting with e.g. email.read, email.read-box-2 or emails
+     * email* - will run all events starting with e.g. email.read, email.read-box-2
      *
      * @param string $handle
      * @throws \Exception - if the event does not exist or the event(s) have failed
      */
     public function trigger(string $handle)
     {
-        if (isset($this->events[$handle]) || array_key_exists($handle, $this->events)) {
+        if ($this->hasEvent($handle)) {
             if (!$this->events[$handle]->handle()) {
                 throw new \Exception(sprintf('Failed Event: %s', $handle));
             }
@@ -75,23 +101,50 @@ final class Dispatcher
     /**
      * Process wildcard handles.
      *
-     * This will iterate over the events and match anything that starts with
-     * the provided handle minus the wildcard char.
-     *
      * @param string $handle
      * @return array
      */
     private function processWildcardHandle(string $handle) : array
     {
-        $startOfHandle = substr($handle, 0, -1);
         $eventsFailed = [];
-        foreach ($this->events as $eventHandle => $event) {
-            if (strpos($eventHandle, $startOfHandle) === 0 && !$event->handle()) {
-                $eventsFailed[] = $eventHandle;
+        $this->processWildcardEvents($handle, function ($handle, $event) use (&$eventsFailed) {
+            if (!$event->handle()) {
+                $eventsFailed[] = $handle;
             }
-        }
+        });
 
         return $eventsFailed;
+    }
+
+    /**
+     * Process wildcard removal.
+     *
+     * @param string $handle
+     * @return array
+     */
+    private function processWildcardRemoval(string $handle) : array
+    {
+        $this->processWildcardEvents($handle, function ($handle) {
+            unset($this->events[$handle]);
+        });
+    }
+
+    /**
+     * This will iterate over the events and match anything that starts with
+     * the provided handle minus the wildcard char, then call the callable
+     * passing the handle as the first parameter and the event as the second.
+     *
+     * @param string $handle
+     * @param callable $method
+     */
+    private function processWildcardEvents(string $handle, callable $method)
+    {
+        $startOfHandle = substr($handle, 0, -1);
+        foreach ($this->events as $eventHandle => $event) {
+            if (strpos($eventHandle, $startOfHandle) === 0) {
+                $method($eventHandle, $event);
+            }
+        }
     }
 
     /**
