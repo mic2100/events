@@ -5,7 +5,11 @@ namespace Mic2100\Events;
 /**
  * Class Dispatcher
  *
- * @package Mic2100\Events
+ * @category Events
+ * @package  Mic2100\Events
+ * @author   Michael Bardsley @mic_bardsley
+ * @link     http://github.com/mic2100/events
+ * @licence  MIT
  */
 final class Dispatcher
 {
@@ -15,21 +19,18 @@ final class Dispatcher
     private $events = [];
 
     /**
-     * @var string
+     * @var Configuration
      */
-    private $wildcard = '*';
+    private $config;
 
     /**
      * Dispatcher constructor
      *
-     * Config can be:
-     * Key: wildcard - Value: any string with length of 1 you want to use as the wildcard defaults to *
-     *
-     * @param array $config
+     * @param Configuration|null $config - if null the default configuration is instantiated
      */
-    public function __construct(array $config)
+    public function __construct(Configuration $config = null)
     {
-        isset($config['wildcard']) && strlen($config['wildcard']) == 1 && $this->wildcard = $config['wildcard'];
+        $this->config = $config;
     }
 
     /**
@@ -112,9 +113,8 @@ final class Dispatcher
      * Process wildcard removal.
      *
      * @param string $handle
-     * @return array
      */
-    private function processWildcardRemoval(string $handle) : array
+    private function processWildcardRemoval(string $handle)
     {
         $this->processMatchingWildcardEvents($handle, function ($handle) {
             unset($this->events[$handle]);
@@ -131,7 +131,7 @@ final class Dispatcher
      */
     private function processMatchingWildcardEvents(string $handle, callable $method)
     {
-        $startOfHandle = substr($handle, 0, -1);
+        $startOfHandle = substr($handle, 0, $this->config->getWildcardLength());
         foreach ($this->events as $eventHandle => $event) {
             if (strpos($eventHandle, $startOfHandle) === 0) {
                 $method($eventHandle, $event);
@@ -147,7 +147,7 @@ final class Dispatcher
      */
     private function isWildcardHandle(string $handle) : bool
     {
-        return substr($handle, -1) == $this->wildcard;
+        return substr($handle, -1) == $this->config->getWildcard();
     }
 
     /**
