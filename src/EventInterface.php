@@ -5,7 +5,11 @@ namespace Mic2100\Events;
 /**
  * Interface EventInterface
  *
- * @package Mic2100\Events
+ * @category Events
+ * @package  Mic2100\Events
+ * @author   Michael Bardsley @mic_bardsley
+ * @link     http://github.com/mic2100/events
+ * @licence  MIT
  */
 interface EventInterface
 {
@@ -17,9 +21,9 @@ interface EventInterface
     const HANDLE = '';
 
     /**
-     * @param array $params
-     *
      * $params will consist of what ever variables are needed throughout the event
+     *
+     * @param array $params
      */
     public function __construct(array $params = []);
 
