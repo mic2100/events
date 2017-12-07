@@ -14,13 +14,6 @@ namespace Mic2100\Events;
 interface EventInterface
 {
     /**
-     * The handle that will be used when calling the event
-     *
-     * @var string
-     */
-    const HANDLE = '';
-
-    /**
      * $params will consist of what ever variables are needed throughout the event
      *
      * @param array $params
