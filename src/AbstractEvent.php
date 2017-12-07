@@ -16,6 +16,11 @@ abstract class AbstractEvent implements EventInterface
     const HANDLE = '';
 
     /**
+     * @var array
+     */
+    protected $params;
+
+    /**
      * $params will consist of what ever variables are needed throughout the event
      *
      * @param array $params
@@ -27,6 +32,8 @@ abstract class AbstractEvent implements EventInterface
                 sprintf('Missing handle for event: %s', get_class($this))
             );
         }
+
+        $this->params = $params;
     }
 
     /**

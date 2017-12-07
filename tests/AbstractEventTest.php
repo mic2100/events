@@ -29,19 +29,31 @@ class AbstractEventTest extends TestCase
         (new $eventClass)->handle();
     }
 
+    /**
+     * @return array
+     */
     public function dataTestEventsThatThrowExpectedException()
     {
-        return [
-            [
-                'Mic2100EventsTests\Events\MissingHandleConstantEvent',
-                '\InvalidArgumentException',
-                'Missing handle for event: Mic2100EventsTests\Events\MissingHandleConstantEvent',
-            ],
-            [
-                'Mic2100EventsTests\Events\MissingHandleEvent',
-                '\RuntimeException',
-                'Missing handle functionality for event: Mic2100EventsTests\Events\MissingHandleEvent',
-            ],
-        ];
+        return [[
+            'Mic2100EventsTests\Events\EmptyStringHandleConstantEvent',
+            '\InvalidArgumentException',
+            'Missing handle for event: Mic2100EventsTests\Events\EmptyStringHandleConstantEvent',
+        ],[
+            'Mic2100EventsTests\Events\ZeroIntegerHandleConstantEvent',
+            '\InvalidArgumentException',
+            'Missing handle for event: Mic2100EventsTests\Events\ZeroIntegerHandleConstantEvent',
+        ],[
+            'Mic2100EventsTests\Events\FalseBooleanHandleConstantEvent',
+            '\InvalidArgumentException',
+            'Missing handle for event: Mic2100EventsTests\Events\FalseBooleanHandleConstantEvent',
+        ],[
+            'Mic2100EventsTests\Events\EmptyArrayHandleConstantEvent',
+            '\InvalidArgumentException',
+            'Missing handle for event: Mic2100EventsTests\Events\EmptyArrayHandleConstantEvent',
+        ],[
+            'Mic2100EventsTests\Events\MissingHandleEvent',
+            '\RuntimeException',
+            'Missing handle functionality for event: Mic2100EventsTests\Events\MissingHandleEvent',
+        ]];
     }
 }

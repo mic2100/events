@@ -30,17 +30,18 @@ final class Dispatcher
      */
     public function __construct(Configuration $config = null)
     {
-        $this->config = $config;
+        $this->config = $config ?? new Configuration;
     }
 
     /**
      * Adds the event to the dispatcher
      *
      * @param EventInterface $event
+     * @param string|null $handle
      */
-    public function addEvent(EventInterface $event)
+    public function addEvent(EventInterface $event, string $handle = null)
     {
-        $this->events[$event::HANDLE] = $event;
+        $this->events[$handle ?? $event::HANDLE] = $event;
     }
 
     /**
@@ -81,9 +82,14 @@ final class Dispatcher
      */
     public function trigger(string $handle)
     {
-        if ($this->hasEvent($handle) && !$this->handleEvent($this->events[$handle])) {
-            throw new \Exception(sprintf('Failed Event: %s', $handle));
-        } elseif ($this->isWildcardHandle($handle)) {
+        $isValidHandle = $this->hasEvent($handle);
+        if ($isValidHandle) {
+            if ($this->handleEvent($this->events[$handle])) {
+                return;
+            } else {
+                throw new \Exception(sprintf('Failed Event: %s', $handle));
+            }
+        } elseif (!$isValidHandle && $this->isWildcardHandle($handle)) {
             $eventsFailed = $this->processWildcardHandle($handle);
             if ($eventsFailed) {
                 throw new \Exception(sprintf('Failed Events: \'%s\'', implode(', ', $eventsFailed)));
