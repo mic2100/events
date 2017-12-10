@@ -78,6 +78,7 @@ final class Dispatcher
      * email* - will run all events starting with e.g. email.read, email.read-box-2
      *
      * @param string $handle
+     * @return null
      * @throws \Exception - if the event does not exist or the event(s) have failed
      */
     public function trigger(string $handle)
@@ -87,7 +88,7 @@ final class Dispatcher
             if ($this->handleEvent($this->events[$handle])) {
                 return;
             } else {
-                throw new \Exception(sprintf('Failed Event: %s', $handle));
+                throw new \Exception(sprintf('Failed Event: \'%s\'', $handle));
             }
         } elseif (!$isValidHandle && $this->isWildcardHandle($handle)) {
             $eventsFailed = $this->processWildcardHandle($handle);
@@ -97,6 +98,8 @@ final class Dispatcher
         } else {
             throw new \Exception(sprintf('Event \'%s\' does not exist', $handle));
         }
+
+        return;
     }
 
     /**

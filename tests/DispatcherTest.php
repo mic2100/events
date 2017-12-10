@@ -4,10 +4,14 @@ namespace Mic2100EventsTests;
 
 use Mic2100\Events\Dispatcher;
 use Mic2100EventsTests\Events\FileCreationEvent;
+use Mic2100EventsTests\Events\HandleMethodReturnsFalseEvent;
+use Mic2100EventsTests\Events\HandleMethodReturnsTrueEvent;
 use PHPUnit\Framework\TestCase;
 
 class DispatcherTest extends TestCase
 {
+    private $testFiles;
+
     /**
      * @var Dispatcher
      */
@@ -17,57 +21,160 @@ class DispatcherTest extends TestCase
     {
         $this->dispatcher = new Dispatcher;
 
-        $this->dispatcher->addEvent(
-            new FileCreationEvent([
+        $this->testFiles = [
+            [
                 'destination' => __DIR__ . '/../testfile1',
                 'contents' => md5(__DIR__ . '/../testfile1'),
-            ]),
-            'create.testfile1'
-        );
-        $this->dispatcher->addEvent(
-            new FileCreationEvent([
+                'handle' => 'create.testfile1',
+            ],[
                 'destination' => __DIR__ . '/../testfile2',
                 'contents' => md5(__DIR__ . '/../testfile2'),
-            ]),
-            'create.testfile2'
-        );
-        $this->dispatcher->addEvent(
-            new FileCreationEvent([
+                'handle' => 'create.testfile2',
+            ],[
                 'destination' => __DIR__ . '/../testfile3',
                 'contents' => md5(__DIR__ . '/../testfile3'),
-            ]),
-            'create.testfile3'
-        );
-        $this->dispatcher->addEvent(
-            new FileCreationEvent([
+                'handle' => 'create.testfile3',
+            ],[
                 'destination' => __DIR__ . '/../testfile4',
                 'contents' => md5(__DIR__ . '/../testfile4'),
-            ]),
-            'create.testfile4'
-        );
+                'handle' => 'create.testfile4',
+            ],
+        ];
+
+        foreach ($this->testFiles as $testFile) {
+            $this->dispatcher->addEvent(
+                new FileCreationEvent([
+                    'destination' => $testFile['destination'],
+                    'contents' => $testFile['contents'],
+                ]),
+                $testFile['handle']
+            );
+        }
     }
 
-    public function testTrigger()
+    public function testTriggerUsingWildcard()
     {
         $this->dispatcher->trigger('create*');
+
+        foreach ($this->testFiles as $testFile) {
+            $this->assertTrue(file_exists($testFile['destination']));
+            $this->assertSame($testFile['contents'], file_get_contents($testFile['destination']));
+        }
+    }
+
+    /**
+     * @dataProvider dataTestFiles
+     *
+     * @param string $destination
+     * @param string $contents
+     * @param string $handle
+     */
+    public function testTriggerWithoutWildcard(string $destination, string $contents, string $handle)
+    {
+        $this->dispatcher->trigger($handle);
+
+        $this->assertTrue(file_exists($destination));
+        $this->assertSame($contents, file_get_contents($destination));
+    }
+
+    /**
+     * @expectedException \Exception
+     * @expectedExceptionMessage Event 'missing-handle' does not exist
+     */
+    public function testTriggerExpectExceptionHandleDoesNotExist()
+    {
+        $this->dispatcher->trigger('missing-handle');
+    }
+
+    /**
+     * @expectedException \Exception
+     * @expectedExceptionMessage Failed Event: 'return-false'
+     */
+    public function testTriggerExpectExceptionFailedEvent()
+    {
+        $this->dispatcher->addEvent(
+            new HandleMethodReturnsFalseEvent(),
+            'return-false'
+        );
+
+        $this->dispatcher->trigger('return-false');
+    }
+
+    /**
+     * @expectedException \Exception
+     * @expectedExceptionMessage Failed Events: 'return-false1, return-false2'
+     */
+    public function testTriggerExpectExceptionFailedEvents()
+    {
+        $this->dispatcher->addEvent(
+            new HandleMethodReturnsFalseEvent(),
+            'return-false1'
+        );
+        $this->dispatcher->addEvent(
+            new HandleMethodReturnsFalseEvent(),
+            'return-false2'
+        );
+
+        $this->dispatcher->trigger('return-fal*');
+    }
+
+    public function testTriggerSingleEventSuccess()
+    {
+        $this->dispatcher->addEvent(
+            new HandleMethodReturnsTrueEvent(),
+            'return-true1'
+        );
+
+        $this->assertNull($this->dispatcher->trigger('return-true1'));
+    }
+
+
+    public function testTriggerMultipleEventsSuccess()
+    {
+        $this->dispatcher->addEvent(
+            new HandleMethodReturnsTrueEvent(),
+            'return-true1'
+        );
+        $this->dispatcher->addEvent(
+            new HandleMethodReturnsTrueEvent(),
+            'return-true2'
+        );
+
+        $this->assertNull($this->dispatcher->trigger('return-t*'));
     }
 
     public function tearDown()
     {
-        if (file_exists(__DIR__ . '/../testfile1')) {
-            unlink(__DIR__ . '/../testfile1');
+        foreach ($this->testFiles as $testFile) {
+            if (file_exists($testFile['destination'])) {
+                unlink($testFile['destination']);
+            }
         }
+    }
 
-        if (file_exists(__DIR__ . '/../testfile2')) {
-            unlink(__DIR__ . '/../testfile2');
-        }
-
-        if (file_exists(__DIR__ . '/../testfile3')) {
-            unlink(__DIR__ . '/../testfile3');
-        }
-
-        if (file_exists(__DIR__ . '/../testfile4')) {
-            unlink(__DIR__ . '/../testfile4');
-        }
+    /**
+     * @return array
+     */
+    public function dataTestFiles() : array
+    {
+        return [
+            [
+                'destination' => __DIR__ . '/../testfile1',
+                'contents' => md5(__DIR__ . '/../testfile1'),
+                'handle' => 'create.testfile1',
+            ],[
+                'destination' => __DIR__ . '/../testfile2',
+                'contents' => md5(__DIR__ . '/../testfile2'),
+                'handle' => 'create.testfile2',
+            ],[
+                'destination' => __DIR__ . '/../testfile3',
+                'contents' => md5(__DIR__ . '/../testfile3'),
+                'handle' => 'create.testfile3',
+            ],[
+                'destination' => __DIR__ . '/../testfile4',
+                'contents' => md5(__DIR__ . '/../testfile4'),
+                'handle' => 'create.testfile4',
+            ],
+        ];
     }
 }
