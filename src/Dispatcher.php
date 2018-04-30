@@ -85,9 +85,7 @@ final class Dispatcher
     {
         $isValidHandle = $this->hasEvent($handle);
         if ($isValidHandle) {
-            if ($this->handleEvent($this->events[$handle])) {
-                return;
-            } else {
+            if (!$this->handleEvent($this->events[$handle])) {
                 throw new \Exception(sprintf('Failed Event: \'%s\'', $handle));
             }
         } elseif (!$isValidHandle && $this->isWildcardHandle($handle)) {
@@ -98,8 +96,6 @@ final class Dispatcher
         } else {
             throw new \Exception(sprintf('Event \'%s\' does not exist', $handle));
         }
-
-        return;
     }
 
     /**
@@ -156,7 +152,7 @@ final class Dispatcher
      */
     private function isWildcardHandle(string $handle) : bool
     {
-        return substr($handle, -1) == $this->config->getWildcard();
+        return substr($handle, -$this->config->getWildcardLength()) == $this->config->getWildcard();
     }
 
     /**
