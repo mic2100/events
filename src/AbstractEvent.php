@@ -13,7 +13,10 @@ namespace Mic2100\Events;
  */
 abstract class AbstractEvent implements EventInterface
 {
-    const HANDLE = '';
+    /**
+     * @var string
+     */
+    protected $handle = '';
 
     /**
      * @var array
@@ -27,7 +30,7 @@ abstract class AbstractEvent implements EventInterface
      */
     public function __construct(array $params = [])
     {
-        if (empty(static::HANDLE)) {
+        if (empty($this->handle)) {
             throw new \InvalidArgumentException(
                 sprintf('Missing handle for event: %s', get_class($this))
             );
@@ -41,10 +44,20 @@ abstract class AbstractEvent implements EventInterface
      *
      * @return bool true/false completed/failed
      */
-    public function handle(): bool
+    public function handle() : bool
     {
         throw new \RuntimeException(
             sprintf('Missing handle functionality for event: %s', get_class($this))
         );
+    }
+
+    /**
+     * Gets the handle used to identify the event
+     *
+     * @return string
+     */
+    public function getHandle() : string
+    {
+        return $this->handle;
     }
 }

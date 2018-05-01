@@ -43,7 +43,7 @@ final class Dispatcher
      */
     public function addEvent(EventInterface $event, string $handle = null)
     {
-        $this->events[$handle ?? $event::HANDLE] = $event;
+        $this->events[$handle ?? $event->getHandle()] = $event;
     }
 
     /**

@@ -6,5 +6,5 @@ use Mic2100\Events\AbstractEvent;
 
 class EmptyArrayHandleConstantEvent extends AbstractEvent
 {
-    const HANDLE = [];
+    protected $handle = [];
 }

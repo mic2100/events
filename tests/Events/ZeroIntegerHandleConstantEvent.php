@@ -6,5 +6,5 @@ use Mic2100\Events\AbstractEvent;
 
 class ZeroIntegerHandleConstantEvent extends AbstractEvent
 {
-    const HANDLE = 0;
+    protected $handle = 0;
 }

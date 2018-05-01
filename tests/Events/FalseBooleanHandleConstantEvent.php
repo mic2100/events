@@ -6,5 +6,5 @@ use Mic2100\Events\AbstractEvent;
 
 class FalseBooleanHandleConstantEvent extends AbstractEvent
 {
-    const HANDLE = false;
+    protected $handle = false;
 }

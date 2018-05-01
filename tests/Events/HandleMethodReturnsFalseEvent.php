@@ -6,7 +6,7 @@ use Mic2100\Events\AbstractEvent;
 
 class HandleMethodReturnsFalseEvent extends AbstractEvent
 {
-    const HANDLE = 'handle-method-returns-false-event';
+    protected $handle = 'handle-method-returns-false-event';
 
     public function handle(): bool
     {

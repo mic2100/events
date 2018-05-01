@@ -6,7 +6,7 @@ use Mic2100\Events\AbstractEvent;
 
 class FileCreationEvent extends AbstractEvent
 {
-    const HANDLE = 'file-creation-event';
+    protected $handle = 'file-creation-event';
 
     public function handle(): bool
     {

@@ -26,4 +26,11 @@ interface EventInterface
      * @return bool true/false completed/failed
      */
     public function handle() : bool;
+
+    /**
+     * Gets the handle used to identify the event
+     *
+     * @return string
+     */
+    public function getHandle() : string;
 }
