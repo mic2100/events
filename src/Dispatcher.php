@@ -43,7 +43,13 @@ final class Dispatcher
      */
     public function addEvent(EventInterface $event, string $handle = null)
     {
-        $this->events[$handle ?? $event->getHandle()] = $event;
+        $handle = $handle ?? $event->getHandle();
+        if (strpos($handle, $this->wildcard) !== false) {
+            throw new \InvalidArgumentException(
+                'The handle cannot contain the wildcard: ' . $handle
+            );
+        }
+        $this->events[$handle] = $event;
     }
 
     /**
