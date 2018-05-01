@@ -14,23 +14,25 @@ namespace Mic2100\Events;
 final class Dispatcher
 {
     /**
+     * Any string you want to use as the wildcard defaults to *
+     *
+     * @var string
+     */
+    private $wildcard = '*';
+
+    /**
      * @var [EventInterface]
      */
     private $events = [];
 
     /**
-     * @var Configuration
-     */
-    private $config;
-
-    /**
      * Dispatcher constructor
      *
-     * @param Configuration|null $config - if null the default configuration is instantiated
+     * @param string|null $wildcard
      */
-    public function __construct(Configuration $config = null)
+    public function __construct(string $wildcard = '*')
     {
-        $this->config = $config ?? new Configuration;
+        $this->wildcard = $wildcard;
     }
 
     /**
@@ -136,7 +138,7 @@ final class Dispatcher
      */
     private function processMatchingWildcardEvents(string $handle, callable $method)
     {
-        $startOfHandle = substr($handle, 0, $this->config->getWildcardLength());
+        $startOfHandle = substr($handle, 0, strlen($this->wildcard));
         foreach ($this->events as $eventHandle => $event) {
             if (strpos($eventHandle, $startOfHandle) === 0) {
                 $method($eventHandle, $event);
@@ -152,7 +154,7 @@ final class Dispatcher
      */
     private function isWildcardHandle(string $handle) : bool
     {
-        return substr($handle, -$this->config->getWildcardLength()) == $this->config->getWildcard();
+        return substr($handle, -strlen($this->wildcard)) == $this->wildcard;
     }
 
     /**
