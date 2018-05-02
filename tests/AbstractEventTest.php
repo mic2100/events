@@ -32,7 +32,7 @@ class AbstractEventTest extends TestCase
     /**
      * @return array
      */
-    public function dataTestEventsThatThrowExpectedException()
+    public function dataTestEventsThatThrowExpectedException() : array
     {
         return [[
             'Mic2100EventsTests\Events\EmptyStringHandleConstantEvent',
