@@ -9,7 +9,7 @@ class SampleEventOne extends AbstractEvent
 {
     protected $handle = 'sample-event-one';
 
-    public function handle() : bool
+    public function handle(array $params = null) : bool
     {
         return true;
     }
@@ -18,7 +18,7 @@ class SampleEventTwo extends AbstractEvent
 {
     protected $handle = 'sample-event-two';
 
-    public function handle() : bool
+    public function handle(array $params = null) : bool
     {
         return true;
     }
