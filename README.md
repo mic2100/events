@@ -1,5 +1,6 @@
 # Events Library
 [![Build Status](https://travis-ci.org/mic2100/events.png?branch=master)](https://travis-ci.org/mic2100/events)
+[![Coverage Status](https://coveralls.io/repos/github/mic2100/events/badge.svg)](https://coveralls.io/github/mic2100/events)
 ## Instructions
 ### Events
 Events can either extend the `AbstractEvent` class or implement the `EventInterface`
