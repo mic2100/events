@@ -74,7 +74,15 @@ final class Dispatcher
      */
     public function hasEvent(string $handle) : bool
     {
-        return isset($this->events[$handle]) || array_key_exists($handle, $this->events);
+        if (isset($this->events[$handle]) || array_key_exists($handle, $this->events)) {
+            return true;
+        }
+
+        if ($this->isWildcardHandle($handle)) {
+            return $this->hasMatchingWildcardEvents($handle);
+        }
+
+        return false;
     }
 
     /**
@@ -93,12 +101,12 @@ final class Dispatcher
      */
     public function trigger(string $handle, array $params = null)
     {
-        $isValidHandle = $this->hasEvent($handle);
-        if ($isValidHandle) {
+        $isWildcardHandle = $this->isWildcardHandle($handle);
+        if ($this->hasEvent($handle) && !$isWildcardHandle) {
             if (!$this->handleEvent($this->events[$handle], $params)) {
                 throw new \Exception(sprintf('Failed Event: \'%s\'', $handle));
             }
-        } elseif (!$isValidHandle && $this->isWildcardHandle($handle)) {
+        } elseif ($isWildcardHandle) {
             $eventsFailed = $this->processWildcardHandle($handle, $params);
             if ($eventsFailed) {
                 throw new \Exception(sprintf('Failed Events: \'%s\'', implode(', ', $eventsFailed)));
@@ -148,12 +156,30 @@ final class Dispatcher
      */
     private function processMatchingWildcardEvents(string $handle, callable $method)
     {
-        $startOfHandle = substr($handle, 0, strlen($this->wildcard));
+        $startOfHandle = substr($handle, 0, strlen($handle) - strlen($this->wildcard));
         foreach ($this->events as $eventHandle => $event) {
             if (strpos($eventHandle, $startOfHandle) === 0) {
                 $method($eventHandle, $event);
             }
         }
+    }
+
+    /**
+     * Has the dispatcher for a matching wildcard event?
+     *
+     * @param string $handle
+     * @return bool
+     */
+    private function hasMatchingWildcardEvents(string $handle) : bool
+    {
+        $startOfHandle = substr($handle, 0, strlen($handle) - strlen($this->wildcard));
+        foreach ($this->events as $eventHandle => $event) {
+            if (strpos($eventHandle, $startOfHandle) === 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -164,7 +190,7 @@ final class Dispatcher
      */
     private function isWildcardHandle(string $handle) : bool
     {
-        return substr($handle, -strlen($this->wildcard)) == $this->wildcard;
+        return substr($handle, -strlen($this->wildcard)) === $this->wildcard;
     }
 
     /**

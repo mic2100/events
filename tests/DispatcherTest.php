@@ -62,12 +62,39 @@ class DispatcherTest extends TestCase
         }
     }
 
+    public function testHasEvent()
+    {
+        foreach ($this->testFiles as $testFile) {
+            $this->assertTrue($this->dispatcher->hasEvent($testFile['handle']));
+        }
+
+        $fakeEvents = [
+            'fake.handle1',
+            'fake.handle2',
+            'fake.handle3',
+            'fake.handle4',
+        ];
+        foreach ($fakeEvents as $fakeEvent) {
+            $this->assertFalse($this->dispatcher->hasEvent($fakeEvent));
+        }
+
+        $wildcardEvents = [
+            'create*',
+            'create.testfil*',
+        ];
+        foreach ($wildcardEvents as $wildcardEvent) {
+            $this->assertTrue($this->dispatcher->hasEvent($wildcardEvent));
+        }
+    }
+
     /**
      * @dataProvider dataTestFiles
      *
      * @param string $destination
      * @param string $contents
      * @param string $handle
+     *
+     * @throws \Exception
      */
     public function testTriggerWithoutWildcard(string $destination, string $contents, string $handle)
     {
