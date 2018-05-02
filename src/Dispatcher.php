@@ -72,7 +72,7 @@ final class Dispatcher
      * @param string $handle
      * @return bool
      */
-    private function hasEvent(string $handle) : bool
+    public function hasEvent(string $handle) : bool
     {
         return isset($this->events[$handle]) || array_key_exists($handle, $this->events);
     }
