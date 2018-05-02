@@ -23,11 +23,11 @@ interface EventInterface
     /**
      * Handle the event
      *
-     * @param mixed $params
+     * @param array|null $params
      *
      * @return bool true/false completed/failed
      */
-    public function handle($params = null) : bool;
+    public function handle(array $params = null) : bool;
 
     /**
      * Gets the handle used to identify the event

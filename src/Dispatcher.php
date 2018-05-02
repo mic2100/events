@@ -86,18 +86,20 @@ final class Dispatcher
      * email* - will run all events starting with e.g. email.read, email.read-box-2
      *
      * @param string $handle
+     * @param array|null  $params
+     *
      * @return null
      * @throws \Exception - if the event does not exist or the event(s) have failed
      */
-    public function trigger(string $handle)
+    public function trigger(string $handle, array $params = null)
     {
         $isValidHandle = $this->hasEvent($handle);
         if ($isValidHandle) {
-            if (!$this->handleEvent($this->events[$handle])) {
+            if (!$this->handleEvent($this->events[$handle], $params)) {
                 throw new \Exception(sprintf('Failed Event: \'%s\'', $handle));
             }
         } elseif (!$isValidHandle && $this->isWildcardHandle($handle)) {
-            $eventsFailed = $this->processWildcardHandle($handle);
+            $eventsFailed = $this->processWildcardHandle($handle, $params);
             if ($eventsFailed) {
                 throw new \Exception(sprintf('Failed Events: \'%s\'', implode(', ', $eventsFailed)));
             }
@@ -110,13 +112,15 @@ final class Dispatcher
      * Process wildcard handles.
      *
      * @param string $handle
+     * @param array|null $params
+     *
      * @return array
      */
-    private function processWildcardHandle(string $handle) : array
+    private function processWildcardHandle(string $handle, array $params = null) : array
     {
         $eventsFailed = [];
-        $this->processMatchingWildcardEvents($handle, function ($handle, $event) use (&$eventsFailed) {
-            !$this->handleEvent($event) && $eventsFailed[] = $handle;
+        $this->processMatchingWildcardEvents($handle, function ($handle, $event) use (&$eventsFailed, $params) {
+            !$this->handleEvent($event, $params) && $eventsFailed[] = $handle;
         });
 
         return $eventsFailed;
@@ -165,10 +169,12 @@ final class Dispatcher
 
     /**
      * @param EventInterface $event
+     * @param array|null $params
+     *
      * @return bool
      */
-    private function handleEvent(EventInterface $event) : bool
+    private function handleEvent(EventInterface $event, array $params = null) : bool
     {
-        return $event->handle();
+        return $event->handle($params);
     }
 }

@@ -8,7 +8,7 @@ class HandleMethodReturnsTrueEvent extends AbstractEvent
 {
     protected $handle = 'handle-method-returns-true-event';
 
-    public function handle($params = null): bool
+    public function handle(array $params = null): bool
     {
         return true;
     }
