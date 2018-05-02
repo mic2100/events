@@ -23,9 +23,11 @@ interface EventInterface
     /**
      * Handle the event
      *
+     * @param mixed $params
+     *
      * @return bool true/false completed/failed
      */
-    public function handle() : bool;
+    public function handle($params = null) : bool;
 
     /**
      * Gets the handle used to identify the event
