@@ -2,6 +2,8 @@
 
 namespace Mic2100EventsTests;
 
+use Mic2100EventsTests\Events\FileCreationEvent;
+use Mic2100EventsTests\Events\HandleMethodReturnsTrueEvent;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -27,6 +29,29 @@ class AbstractEventTest extends TestCase
         $this->expectException($expectedException);
         $this->expectExceptionMessage($exceptionMessage);
         (new $eventClass)->handle();
+    }
+
+    public function testEventParams()
+    {
+        $params = [
+            'destination' => __DIR__ . '/../testfile1',
+            'contents' => 'This is a test',
+        ];
+
+        $event = new FileCreationEvent($params);
+        $this->assertSame($params, $event->getParams());
+        $event->handle();
+        $this->assertSame($params, $event->getParams());
+
+        $altParams = [
+            'destination' => __DIR__ . '/../testfile2',
+            'contents' => 'This is a test altered',
+        ];
+
+        $event->handle($altParams);
+        $this->assertNotSame($params['destination'], $event->getParams()['destination']);
+        $this->assertNotSame($params['contents'], $event->getParams()['contents']);
+        $this->assertSame($altParams, $event->getParams());
     }
 
     /**

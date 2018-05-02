@@ -62,4 +62,14 @@ abstract class AbstractEvent implements EventInterface
     {
         return $this->handle;
     }
+
+    /**
+     * Gets the params that have been set
+     *
+     * @return array
+     */
+    public function getParams() : array
+    {
+        return $this->params;
+    }
 }
